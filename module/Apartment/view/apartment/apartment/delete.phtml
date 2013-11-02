@@ -1,0 +1,36 @@
+
+<html>
+
+<?php
+$title = "Einen Datensatz loeschen";
+$this->headTitle ( $title );
+
+?>
+
+<h1><?php echo $title;?></h1>
+
+<p>Sind Sie sich sicher, dass Sie den Datensatz fuer die Wohnung Nummer <?php echo $id;?> loeschen wollen?</p>
+
+<?php
+
+$url = $this->url ( 'apartment', array (
+		
+		'action' => 'delete',
+		'id' => $this->id 
+) );
+
+?>
+
+<form action="<?php echo $url;?>" method="post">
+
+	<div>
+
+		<input type="hidden" name="id" value="<?php echo $this->id;?>"> <input
+			type="submit" name="del" value="Ja"> <input type="submit" name="del"
+			value="Nein">
+
+
+	</div>
+</form>
+
+</html>

@@ -1,0 +1,221 @@
+
+<html>
+
+<head>
+
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+<script>
+
+
+
+$(document).ready(function(){
+	// Lichter toggeln
+	$("#button_light").click(function(){
+
+			
+
+			var myData = {
+
+					zimmername :"<?php echo $room->name?>",
+					wohnungsnummer : <?php echo $apartment->id?>
+
+					};
+
+			$.ajax({
+
+				type:"POST",
+				 url: "http://hiwi.jochen-bauer.net/ehcTest/public/enter/toggleLight",
+			//	url:"http://zf2-tutorial.localhost/enter/toggleLight",
+				data:myData,
+				success:function(data){
+					
+					//Anpassen des Knopftexts
+					$("#button_light").text(data.button);
+					//Anpassen des Status
+					$("#status_light").text(data.status);
+
+					// Anpassen des Verbrauchstextes
+					var ver_light;
+
+					if (data.status == "An"){
+					ver_light = 10;}else{ver_light = 0;}
+
+					$("#verbrauch_licht").text(ver_light);
+
+					// Anpassen des Gesamtverbrauchs
+					$("#verbrauch_gesamt").text(data.room_power_sum);
+					
+
+					},
+				failure:function(){
+					alert("Post has failed");
+					}
+				});
+			});
+	
+	// Solltemperatur aendern
+
+	//Funktion, mit der man eine Solltemperatur einstellt
+
+	$("#set_temperature").click(function(){
+
+		
+
+		var sollTemp = $("#input_temp").val();
+		if (sollTemp !=  ""){
+		sollTemp = Math.round(sollTemp);
+		
+		
+		var myData = {
+				'sollTemp':sollTemp,
+				'wohnungsnummer': <?php echo $apartment->id?>,
+				'name':'<?php echo $room->name?>'		
+				};
+
+		$.ajax({
+
+			type:"POST",
+			 url:"http://hiwi.jochen-bauer.net/ehcTest/public/enter/changeTemp",
+		//	url:"/enter/changeTemp",
+			data:myData,
+			success:function(data){
+
+					
+
+					
+					$('#ist_temp').text(sollTemp);
+					
+					$("#verbrauch_temp").text(data.tempverbrauch_zimmer);
+
+					// Anpassen des Gesamtverbrauchs
+					$("#verbrauch_gesamt").text(data.room_power_sum);
+					
+				
+				},
+			failure:function(){alert("Failure TempChange");}
+			});
+		
+		}			
+
+
+		});
+
+});
+
+
+
+
+</script>
+
+
+</head>
+
+<body>
+
+<?php
+$title = $this->escapeHtml ( $room->name );
+$this->headTitle ( $title );
+
+?>
+
+
+	<h1><?php echo ($title)?></h1>
+
+	<hr>
+
+
+	<h3>Verbrauch</h3>
+
+	<table cellpadding="10">
+
+		<tr>
+			<td>Licht</td>
+			<td id="verbrauch_licht"><?php echo $room->power_light?></td>
+		</tr>
+
+		<tr>
+			<td>Heizung/Klimaanlage</td>
+			<td id="verbrauch_temp"><?php echo $room->power_temperature?></td>
+		</tr>
+
+		<tr>
+			<td>Angeschlossene Geraete</td>
+			<td><?php echo $room->power_device?></td>
+		</tr>
+
+		<tr>
+			<td>Gesamt</td>
+			<td id="verbrauch_gesamt"><?php echo $room->getPowerSum();?></td>
+		</tr>
+
+
+
+
+	</table>
+
+	<hr>
+
+	<h3>Bedienung</h3>
+
+
+	<table cellpadding="10">
+
+		<tr>
+			<td>Licht</td>
+			<td id="status_light"><?php
+			$string;
+			$buttonString;
+			if ($room->light == true) {
+				$string = 'An';
+				$buttonString = 'Ausschalten';
+			} else {
+				$string = 'Aus';
+				$buttonString = 'Anschalten';
+			}
+			
+			echo $string;
+			
+			?></td>
+			<td></td>
+
+			<td><button id="button_light"><?php echo $buttonString;?></button></td>
+		</tr>
+
+		<tr>
+			<td>Temperatur</td>
+			<td id="ist_temp"><?php echo $room->temperature?></td>
+			<td>Solltemperatur: <input type="number"
+				value=<?php echo $room->temperature?> id="input_temp"></td>
+			<td><button id="set_temperature">Einstellen</button></td>
+		</tr>
+
+
+
+	</table>
+
+
+
+
+
+
+
+	<hr>
+
+	<a style="float: left;"
+		href=<?php echo $this->url('enter-loc', array('id' => $apartment->id));?>>Zurueck
+		zur Wohnungsuebersicht</a>
+
+	<a style="float: right"
+		href=<?php echo $this->url('room-loc', array('apartment' => $apartment->id, 'room'=>$room->name, 'action'=>'logout'))?>>Ausloggen</a>
+
+	<br>
+
+
+</body>
+
+
+
+
+</html>

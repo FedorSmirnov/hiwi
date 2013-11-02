@@ -1,0 +1,47 @@
+
+<html>
+
+<?php
+$title = "Login Seite";
+$this->headTitle ( $title );
+
+?>
+
+<h1><?php echo $title;?></h1>
+
+<p>Bitte geben Sie Ihre Zugangsdaten ein:</p>
+<br>
+
+<form method="post">
+
+	<p>Benutzername:</p>
+	<input type="text" name="name"><br> <br>
+
+	<p>Passwort:</p>
+	<input type="password" name="password"><br> <br> <input type="submit"
+		name="login" value="Funktionale Sicht"> <br><br> <input
+		type="submit" name="login" value="Zimmer Sicht"><br> <br>
+	
+	<?php
+	
+	if (isset ( $_SESSION ['errors'] )) :
+		;
+		?>
+	
+		
+		<br> <br>
+	<div class="form-errors">
+
+		<p>
+			<font color="FF0000"><?php echo $_SESSION['errors'];?></font>
+		</p>
+
+	</div>
+
+<?php endif;?>
+
+</form>
+
+
+
+</html>

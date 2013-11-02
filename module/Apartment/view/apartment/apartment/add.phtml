@@ -1,0 +1,43 @@
+
+<html>
+
+<?php
+$title = "Eine neue Wohnung erstellen.";
+
+$this->headTitle ( $title );
+
+?>
+
+<h1><?php echo $title;?></h1>
+
+<?php
+
+$form->setAttribute ( 'action', $this->url ( 'apartment', array (
+		
+		'action' => 'add' 
+) ) );
+
+$form->prepare ();
+
+echo $this->form ()->openTag ( $form ) . '<br>';
+
+echo $this->formHidden ( $form->get ( 'id' ) );
+echo $this->formLabel ( $form->get ( 'adress' ) ) . '<br>';
+echo $this->formElementErrors ( $form->get ( 'adress' ) ) . '<br>';
+echo $this->formInput ( $form->get ( 'adress' ) ) . '<br><br>';
+
+echo $this->formLabel ( $form->get ( 'room_num' ) ) . '<br>';
+echo $this->formElementErrors ( $form->get ( 'room_num' ) ) . '<br>';
+echo $this->formInput ( $form->get ( 'room_num' ) ) . '<br><br>';
+
+echo $this->formLabel ( $form->get ( 'floor' ) ) . '<br>';
+echo $this->formElementErrors ( $form->get ( 'floor' ) ) . '<br>';
+echo $this->formInput ( $form->get ( 'floor' ) ) . '<br><br>';
+
+echo $this->formSubmit ( $form->get ( 'submit' ) );
+echo $this->form ()->closeTag ();
+
+?>
+
+
+</html>

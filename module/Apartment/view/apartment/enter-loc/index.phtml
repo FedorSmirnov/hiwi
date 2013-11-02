@@ -1,0 +1,58 @@
+<html>
+
+
+
+
+<body>
+
+<?php
+$title = "Wohnung " . $apartment->adress;
+
+$this->headTitle ( $title );
+
+?>
+
+
+<h1><?php echo $this->escapeHtml($title);?></h1>
+
+
+
+	<hr>
+
+	<h2>Liste der Zimmer</h2>
+
+	<table cellpadding="10">
+
+<?php foreach ($rooms as $room):?>
+
+
+<tr>
+
+			<td><?php echo $room->name;?></td>
+			<td><a
+				href=<?php echo $this->url('room-loc', array('apartment' => $apartment->id, 'room'=> $room->name));?>>Zimmer
+					betreten</a></td>
+
+		</tr>
+
+
+<?php endforeach;?>
+
+</table>
+
+
+	<hr>
+
+	<!-- Knopf zum Ausloggen -->
+	<a style="float: right"
+		href=<?php echo $this->url('enter-loc', array('action' => 'logout'));?>>Ausloggen</a>
+
+	<br>
+
+</body>
+
+
+
+</html>
+
+

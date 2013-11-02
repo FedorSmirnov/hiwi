@@ -1,0 +1,66 @@
+
+<html>
+
+<?php
+$title = 'Liste der Apartments';
+$this->headTitle ( $title );
+
+?>
+
+<h1><?php echo $title?></h1>
+
+<p>
+
+	<a
+		href="<?php echo $this->url('apartment', array('action' => 'add'));?>">Eine
+		Wohnung zur Liste hinzufuegen</a>
+
+</p>
+
+<table class="table">
+
+	<tr>
+
+		<th>Nummer</th>
+		<th>Adresse</th>
+		<th>Stockwerk</th>
+		<th>Anzahl der Zimmer</th>
+
+	</tr>
+	
+<?php
+foreach ( $apartments as $apartment ) :
+	?>	
+
+<tr>
+
+		<td><?php echo $apartment->id?></td>
+		<td><?php echo $apartment->adress?></td>
+		<td><?php echo $apartment->floor?></td>
+		<td><?php echo $apartment->room_num?></td>
+		<td><a
+			href="<?php echo $this->url('apartment', array('action' => 'delete', 'id' => $apartment->id));?>">Datensatz
+				loeschen</a><br> <a
+			href="<?php echo $this->url('enter', array('id' => $apartment->id));?>">Die
+				Wohnung betreten</a></td>
+
+	</tr>
+
+<?php
+endforeach
+;
+?>
+
+
+
+</table>
+<br>
+<hr>
+
+<a
+	href=<?php echo $this->url('apartment', array('action' => 'logout'))?>
+	style="float: right">Ausloggen</a>
+<br>
+
+
+</html>

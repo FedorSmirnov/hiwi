@@ -1,0 +1,511 @@
+<html>
+
+<head>
+
+
+
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+
+
+<script>
+
+
+	$(document).ready(function() {
+			
+		//Funktion fuer die Dropdown Liste
+		$(".button_dropdown").click(function() {
+
+			var index = $(".button_dropdown").index(this);
+
+			var table_sel = "#tabelle" + index;
+			var button_sel = "#button_table_" + index;
+
+			//Toggeln der Tabelle
+			$(table_sel).toggle();
+
+			//Ändern des Knopftexts
+			$(button_sel).text(function(i, oldText) {
+
+				if (oldText == "+") {
+
+					return "-";
+				} else {
+					return "+";
+				}
+			});
+		});
+
+		//Funktion, mit der das Anschalten eines Lichts gemacht wird
+		$(".button_light").click(function(){
+
+			alert("Klick");
+			var index = $(".button_light").index(this);
+			var buttonId = "#button_light_" + index;
+			var nameId = "#room_name_light_" + index;
+			var statusId = "#status_light_" + index;
+
+			var roomName = $(nameId).text();
+
+			var myData = {
+
+					zimmername : roomName,
+					wohnungsnummer : <?php echo $apartment->id?>
+
+					};
+
+			$.ajax({
+
+				type:"POST",
+				url: "/enter/toggleLight",
+				data:myData,
+				success:function(data){
+
+					//Anpassen des Knopftexts
+					$(buttonId).text(data.button);
+					//Anpassen des Status
+					$(statusId).text(data.status);
+					//Anpassen des GesamtLichtverbrauchs
+					$("#text_power_sum_light").text(data.power_sum);
+					//Anpassen des Gesamtverbrauchs der Wohnung
+					$("#text_apartment_power").text(data.power_apartment);
+
+					},
+				failure:function(){
+					alert("Post has failed");
+					}
+
+
+				});
+
+
+			});
+
+		//Funktion, mit der man alle Lichter ausschaltet
+		$("#button_lightsout_all").click(function(){
+
+			var myData = {
+					wohnungsnummer:<?php echo $apartment->id?>
+
+					};
+			
+			$.ajax({
+					type:"POST",
+					url:"/enter/allLightsOut",
+					data:myData,
+					success:function(data){
+
+						// Alle Buttons auf an 
+						$(".button_light").text("An");
+						// Alle Status auf aus
+						$(".status_light").text("Aus");
+						// Lichtverbrauch auf 0
+						$("#text_power_sum_light").text("0");
+						// Gesamtverbrauch anpassen
+						$("#text_apartment_power").text(data.gesamtverbrauch);
+						
+
+						},
+					failure:function(){
+					alert("the post of the allLightsOut has failed");
+						}
+	
+				});
+
+
+
+			});
+
+		//Funktion, mit der man eine Solltemperatur einstellt
+
+		$(".set_temperature").click(function(){
+
+			var index = $(".set_temperature").index(this);
+			var nameSel = "#temp_name_" + index;
+			var sollSel = "#temp_soll_" + index;
+			var verbrauchSel = "#temp_verbrauch_" + index;
+			var inputSel = "#temp_input_" + index;
+
+			var sollTemp = $(inputSel).val();
+			if (sollTemp !=  ""){
+			sollTemp = Math.round(sollTemp);
+			var name = $(nameSel).text();
+			
+			var myData = {
+					'sollTemp':sollTemp,
+					'wohnungsnummer': <?php echo $apartment->id?>,
+					'name':name		
+					};
+
+			$.ajax({
+
+				type:"POST",
+				url:"/enter/changeTemp",
+				data:myData,
+				success:function(data){
+
+						
+
+						// Anpassen des gesamtverbrauchs, der Solltemperatur, des Zimmerverbrauchs und des Wohnungstempverbrauchs
+						$(sollSel).text(sollTemp);
+						$("#text_apartment_power").text(data.gesamtverbrauch);
+						$("#text_temp_gesamt").text(data.tempverbrauch_wohnung);
+						$(verbrauchSel).text(data.tempverbrauch_zimmer);
+						
+					
+					},
+				failure:function(){alert("Failure TempChange");}
+				});
+			
+			}			
+
+
+			});
+
+		// Funtion, um alle Heizungen/Klimaanlagen abzuschalten
+
+		$("#button_temp_all_off").click(function(){
+
+			// Der Server bekommt die Nummer der Wohnung und den GesamtTemperaturVerbrauch
+
+			var id = <?php echo $apartment->id?>;
+			var temp_verbrauch = $("#text_temp_gesamt").text();
+
+			var myData = {
+					'id':id,
+					'temp_verbrauch':temp_verbrauch
+					};
+
+			$.ajax({
+
+				type:"POST",
+				url:"/enter/allTempOff",
+				data:myData,
+				success:function(data){
+					
+					var gesamtverbrauch = data.gesamtverbrauch;
+					$("#text_apartment_power").text(gesamtverbrauch);
+					$('#text_temp_gesamt').text(0);
+
+					// Anpassen aller Soll- an die Aussentemperaturen
+					$(".temp_soll").text(function(index, text){
+
+						var temp_aussen_sel = "#temp_aussen_" + index;
+
+						return $(temp_aussen_sel).text();
+
+						});
+
+					// Heruntersetzen aller Verbrauche der Zimmer
+					$(".temp_verbrauch").text(0);
+
+					},
+				failure:function(){
+					alert("post alltempoff failed");
+					}	
+				});
+
+
+			});
+		
+
+		
+	});
+	
+</script>
+
+
+
+
+
+</head>
+
+<!-- Alle Tabellen erstmal ausblenden -->
+
+
+
+<?php
+$title = "Die Wohnung Nummer " . $apartment->id;
+
+$this->headTitle ( $title );
+
+?>
+
+
+<body>
+	<h1>
+		<?php echo $this->escapeHtml($title);?>
+	</h1>
+	<hr>
+
+	<!-- 	Allgemeine Daten -->
+
+	<h3>
+		Allgemeine Daten
+		<button type="button" id="button_table_0" class="button_dropdown"
+			style="float: right">+</button>
+	</h3>
+
+	<table id="tabelle0" hidden="true" cellpadding="10">
+		<tr>
+			<td>Adresse:</td>
+			<td>
+				<?php echo $this->escapeHtml($apartment->adress)?>
+			</td>
+		</tr>
+		<tr>
+			<td>Stockwerk:</td>
+			<td>
+				<?php echo $this->escapeHtml($apartment->floor)?>
+			</td>
+		</tr>
+		<tr>
+			<td>Gesamtverbrauch:</td>
+			<td id="text_apartment_power">
+				<?php
+				
+				if ($apartment->power == 0) {
+					echo "0";
+				} else {
+					
+					echo $this->escapeHtml ( $apartment->power );
+				}
+				?>
+			</td>
+		</tr>
+
+	</table>
+
+	<hr>
+
+	<!-- 		Licht -->
+
+	<h3>
+		Beleuchtung
+		<button type="button" id="button_table_1" class="button_dropdown"
+			style="float: right">+</button>
+	</h3>
+
+	<table id="tabelle1" hidden="true" cellpadding="10">
+
+		<tr>
+			<td>Gesamtverbrauch</td>
+			<?php
+			
+			// Ausrechnen des Gesamtlichtverbrauchs
+			$rooms->buffer ();
+			$powerSum = 0;
+			foreach ( $rooms as $room1 ) {
+				if ($room1->power_light == null) {
+					
+					$room1->power_light = 0;
+				}
+				
+				$powerSum = $powerSum + $room1->power_light;
+			}
+			
+			?>
+			<td id="text_power_sum_light"><?php echo $powerSum?></td>
+			<td><button id="button_lightsout_all">Alle Lichter Ausschalten</button></td>
+
+		</tr>
+
+		<tr>
+
+			<th>Zimmer</th>
+			<th>Licht</th>
+
+		</tr>
+
+		<?php
+		$counter = - 1;
+		
+		foreach ( $rooms as $room ) :
+			
+			?>
+
+		<?php $counter++;?>
+
+
+		<tr>
+
+			<td class="room_name_light"
+				id=<?php echo "room_name_light_" . $counter?>><?php echo $this->escapeHtml($room->name);?>
+			</td>
+
+			<?php
+			
+			if ($room->light == 0) {
+				
+				$light = "Aus";
+				$button = "An";
+			} else {
+				$light = "An";
+				$button = "Aus";
+			}
+			
+			?>
+
+			<td class="status_light" id=<?php echo "status_light_" . $counter?>><?php echo $light;?></td>
+
+			<td><button class="button_light"
+					id=<?php echo "button_light_" . $counter?>>
+					<?php echo $button;?></button></td>
+
+		</tr>
+
+		<?php endforeach;?>
+
+	</table>
+
+	<hr>
+
+	<!-- 	Temperatur -->
+
+	<h3>
+		Temperatur
+		<button type="button" id="button_table_2" class="button_dropdown"
+			style="float: right">+</button>
+	</h3>
+
+	<table id="tabelle2" hidden=true cellpadding="10">
+
+		<tr>
+
+			<td>Gesamtverbrauch</td>
+			<?php
+			// erechnen des gesamtVerbrauchs der Heizung
+			$sum = 0;
+			foreach ( $rooms as $room ) {
+				
+				if ($room->power_temperature == null) {
+					$room->power_temperature = 0;
+				}
+				$sum = $sum + $room->power_temperature;
+			}
+			
+			?>
+			<td id="text_temp_gesamt"><?php echo $sum?></td>
+			<td id="button_temp_all_off"><button>Alle Heizungen/Klimaanlagen
+					ausschalten</button></td>
+
+		</tr>
+
+		<tr>
+
+			<th>Zimmer</th>
+			<th>Solltemperatur</th>
+			<th>Aussentemperatur</th>
+			<th>Energieverbrauch</th>
+
+
+		</tr>
+
+		<?php
+		$counter = - 1;
+		foreach ( $rooms as $room ) :
+			$counter ++;
+			?>
+		
+		<tr>
+
+			<td id=<?php echo "temp_name_" . $counter?>>
+				<?php echo $this->escapeHtml($room->name);?>
+			</td>
+			<td id=<?php echo "temp_soll_" . $counter?> class="temp_soll">
+				<?php echo $room->temperature?>
+			</td>
+			<td id=<?php echo "temp_aussen_" . $counter?> class="temp_aussen">
+				<?php echo $room->temperature_outside?>
+			</td>
+			<!-- Energieverbrauch -->
+			<td class="temp_verbrauch"
+				id=<?php echo "temp_verbrauch_" . $counter?>><?php
+			
+			if ($room->power_temperature == null) {
+				$verbrauch = 0;
+			} else {
+				$verbrauch = $room->power_temperature;
+			}
+			echo $verbrauch?></td>
+			<td>Solltemperatur: <input type="number"
+				id=<?php echo "temp_input_" . $counter?>></td>
+			<td><button class="set_temperature"
+					id=<?php echo "temp_button_".$counter?>>Einstellen</button></td>
+
+		</tr>
+
+
+
+		<?php endforeach;?>
+
+
+
+	</table>
+
+
+
+	<hr>
+
+	<h3>
+		Sonstige Geraete
+		<button id="button_table_3" class="button_dropdown"
+			style="float: right">+</button>
+	</h3>
+
+	<table id="tabelle3" hidden=true cellpadding="10">
+
+		<tr>
+
+			<td>Gesamtverbrauch</td>
+			<td>0</td>
+			<td><button>Alle Geraete ausschalten</button></td>
+
+		</tr>
+
+		<tr>
+
+			<th>Zimmer</th>
+			<th>Verbrauch der Geraete</th>
+		</tr>
+
+		<?php foreach ($rooms as $room):?>
+
+		<tr>
+
+			<td>
+				<?php echo $this->escapeHtml($room->name);?>
+			</td>
+			<td>0</td>
+			<td><button>Betreten</button></td>
+
+
+		</tr>
+
+
+		<?php endforeach;?>
+
+	</table>
+
+	<br>
+	<hr>
+	<?php
+	
+if ($admin == "true") {
+		
+		echo '<a style="float: left"
+		href=' . $this->url ( 'apartment' ) . '>Zurueck zur Uebersicht</a>';
+	}
+	?>
+	
+	
+
+	<a style="float: right"
+		href=<?php echo $this->url('enter', array('action' => 'logout'))?>>Ausloggen</a>
+	<br>
+
+
+</body>
+
+</html>
